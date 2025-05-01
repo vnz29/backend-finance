@@ -7,10 +7,7 @@ const mongoURI = process.env.MONGO_URI;
 
 export const connectDB = async () => {
   try {
-    await mongoose.connect(mongoURI, {
-      useNewUrlParser: true,
-      useUnifiedTopology: true,
-    });
+    await mongoose.connect(mongoURI);
     console.log("Connected to MongoDB Atlas");
   } catch (err) {
     console.error("Failed to connect to MongoDB Atlas:", err);
