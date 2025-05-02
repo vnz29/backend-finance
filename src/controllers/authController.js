@@ -41,6 +41,10 @@ export const createUser = async (req, res) => {
 
 export const loginUser = async (req, res) => {
   const { username, password } = req.body;
+  console.log("test");
+  console.log(process.env.REFRESH_TOKEN_SECRET);
+  console.log(process.env.ACCESS_TOKEN_SECRET);
+  console.log(username, password);
   try {
     if (!username || !password) {
       return res.status(400).json({ errorMessage: "input all fields" });
