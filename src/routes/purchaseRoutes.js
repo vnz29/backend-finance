@@ -13,9 +13,9 @@ import {
 
 const router = express.Router();
 router.get("/", authenticateToken, getCurrentPurchase);
-router.get("/search", getSpecificPurchase);
-router.post("/addPurchase", addPurchase);
-router.put("/updatePurchase", updatePurchase);
-router.delete("/updatePurchase", deletePurchase);
+router.get("/search", authenticateToken, getSpecificPurchase);
+router.post("/addPurchase", authenticateToken, addPurchase);
+router.put("/updatePurchase", authenticateToken, updatePurchase);
+router.delete("/updatePurchase", authenticateToken, deletePurchase);
 
 export default router;
