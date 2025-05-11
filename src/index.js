@@ -5,7 +5,6 @@ import cookieParser from "cookie-parser";
 import cors from "cors";
 const app = express();
 
-app.use(cookieParser());
 // Allow frontend origin
 app.use(
   cors({
@@ -13,11 +12,11 @@ app.use(
     credentials: true, // if you're using cookies or authorization headers
   })
 );
+app.use(cookieParser());
+app.use(express.json());
 // Connect to MongoDB
 connectDB();
 const PORT = process.env.PORT || 3000;
-
-app.use(express.json());
 
 app.use(routes);
 
