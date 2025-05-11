@@ -69,7 +69,7 @@ export const loginUser = async (req, res) => {
       httpOnly: true,
       secure: true, // ✅ required for SameSite=None
       sameSite: "None",
-
+      path: "/api/user/refreshToken",
       maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
     });
 
