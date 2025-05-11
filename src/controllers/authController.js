@@ -67,8 +67,8 @@ export const loginUser = async (req, res) => {
     const { accessToken, refreshToken } = generateTokens(existingUser);
     res.cookie("refreshToken", refreshToken, {
       httpOnly: true,
-      secure: false,
-      sameSite: "None",
+      secure: false, // ✅ false in dev
+      sameSite: "Lax",
       maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
     });
 
