@@ -68,8 +68,8 @@ export const loginUser = async (req, res) => {
     res.cookie("refreshToken", refreshToken, {
       httpOnly: true,
       secure: true, // ✅ required for SameSite=None
-      sameSite: "None",
-      path: "/api/user/refreshToken",
+      sameSite: "Strict",
+
       maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
     });
 
@@ -87,8 +87,9 @@ export const loginUser = async (req, res) => {
 
 // REFRESH TOKEN
 export const refreshToken = async (req, res) => {
+  console.log("Cookies:", req.cookies);
   const token = req.cookies.refreshToken;
-  console.log(token);
+  // console.log(token);
   if (!token) return res.sendStatus(401);
 
   jwt.verify(token, process.env.REFRESH_TOKEN_SECRET, (err, user) => {
