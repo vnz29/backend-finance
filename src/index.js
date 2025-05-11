@@ -4,6 +4,8 @@ import routes from "./routes/indexRoutes.js";
 import cookieParser from "cookie-parser";
 import cors from "cors";
 const app = express();
+
+app.use(cookieParser());
 // Allow frontend origin
 app.use(
   cors({
@@ -16,7 +18,7 @@ connectDB();
 const PORT = process.env.PORT || 3000;
 
 app.use(express.json());
-app.use(cookieParser());
+
 app.use(routes);
 
 app.listen(PORT, () => {
