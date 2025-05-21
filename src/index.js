@@ -9,7 +9,8 @@ const app = express();
 app.use(
   cors({
     origin:
-      "https://purchase-frontend-xwus-nqe7f4vpk-vnz29s-projects.vercel.app",
+      // "https://purchase-frontend-xwus-nqe7f4vpk-vnz29s-projects.vercel.app",
+      "http://localhost:5173/",
     credentials: true, // if you're using cookies or authorization headers
   })
 );
