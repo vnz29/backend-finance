@@ -4,6 +4,7 @@ import {
   loginUser,
   logoutUser,
   refreshToken,
+  loginGoogle,
 } from "../controllers/authController.js";
 
 const router = express.Router();
@@ -12,5 +13,6 @@ router.post("/google");
 router.post("/login", loginUser);
 router.post("/refreshToken", refreshToken);
 router.post("/logout", logoutUser);
+router.post("/google", loginGoogle);
 
 export default router;
