@@ -15,7 +15,7 @@ const router = express.Router();
 router.get("/", authenticateToken, getCurrentPurchase);
 router.get("/search", authenticateToken, getSpecificPurchase);
 router.post("/addPurchase", authenticateToken, addPurchase);
-router.put("/updatePurchase", authenticateToken, updatePurchase);
-router.delete("/updatePurchase", authenticateToken, deletePurchase);
+router.put("/updatePurchase/:id", authenticateToken, updatePurchase);
+router.patch("/deletePurchase/:id", authenticateToken, deletePurchase);
 
 export default router;

@@ -1,7 +1,8 @@
 import Purchase from "../models/purchaseModel.js";
 
 export const getCurrentPurchase = async (req, res) => {
-  const { userID } = req.body;
+  const userID = req.query.userID;
+
   const startOfDay = new Date();
   startOfDay.setHours(0, 0, 0, 0); // Set to 00:00:00.000 (start of today)
 
@@ -11,6 +12,7 @@ export const getCurrentPurchase = async (req, res) => {
   try {
     const item = await Purchase.find({
       userId: userID,
+      isDeleted: false,
       createdAt: {
         // Using createdAt field from timestamps
         $gte: startOfDay, // Greater than or equal to the start of today
@@ -48,6 +50,7 @@ export const getSpecificPurchase = async (req, res) => {
   try {
     const events = await Purchase.find({
       userId: userID,
+      isDeleted: false,
       createdAt: {
         // Using createdAt field from timestamps
         $gte: startDate, // Greater than or equal to the start of today
@@ -64,12 +67,13 @@ export const getSpecificPurchase = async (req, res) => {
 
 export const addPurchase = async (req, res) => {
   const { name, amount, userID } = req.body;
-  console.log(new Date());
+
   try {
     // Create a new user instance
     const item = new Purchase({
       name,
       amount,
+      isDeleted: false,
       userId: userID,
     });
 
@@ -97,19 +101,25 @@ export const updatePurchase = async (req, res) => {
       return res.status(404).json({ message: "Purchased Item not found" });
     }
 
-    res.json(item);
+    res.json({ item, message: "Item successfully updated" });
   } catch (err) {
     console.error(err);
     res.status(500).json({ message: "Server error" });
   }
 };
 export const deletePurchase = async (req, res) => {
+  console.log("test delete page");
+  const PurchaseID = req.params.id;
+  const updatedPurchase = req.body;
   try {
-    const item = await Purchase.findByIdAndDelete(req.params.id);
+    const item = await Purchase.findByIdAndUpdate(PurchaseID, updatedPurchase, {
+      new: true, // Return the updated document
+      runValidators: true, // Ensure that the update meets schema validation
+    });
     if (!item) {
       return res.status(404).send("Item not found");
     }
-    res.status(200).send(`Deleted item: ${item}`);
+    res.status(200).json({ message: "Purchase Successfully Deleted" });
   } catch (error) {
     res.status(500).send("Error deleting item");
   }

@@ -1,7 +1,8 @@
 import User from "../models/userModel.js";
 import jwt from "jsonwebtoken";
 import bcrypt from "bcrypt";
-
+const { OAuth2Client } = require("google-auth-library");
+const client = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
 const generateTokens = (user) => {
   const accessToken = jwt.sign(
     { id: user.id },
@@ -87,8 +88,8 @@ export const loginUser = async (req, res) => {
 
 // REFRESH TOKEN
 export const refreshToken = async (req, res) => {
-  console.log("Cookies:", req.cookies);
   const token = req.cookies.refreshToken;
+
   // console.log(token);
   if (!token) return res.sendStatus(401);
 
@@ -108,4 +109,81 @@ export const refreshToken = async (req, res) => {
 export const logoutUser = async (req, res) => {
   res.clearCookie("refreshToken");
   res.sendStatus(204);
+};
+
+//login using google
+export const loginGoogle = async (req, res) => {
+  const { username, password } = req.body;
+
+  const { credential } = req.body;
+
+  if (!credential) {
+    return res.status(400).json({ message: "Missing credential token" });
+  }
+
+  try {
+    const ticket = await client.verifyIdToken({
+      idToken: credential,
+      audience: process.env.GOOGLE_CLIENT_ID,
+    });
+
+    const payload = ticket.getPayload();
+    const { sub, email, name, picture } = payload;
+
+    // Create your app's own JWT
+    const token = jwt.sign(
+      { sub, email, name, picture },
+      process.env.JWT_SECRET,
+      {
+        expiresIn: "1h",
+      }
+    );
+
+    res.json({ token });
+  } catch (err) {
+    console.error("Google login error:", err);
+    res.status(401).json({ message: "Invalid Google token" });
+  }
+
+  try {
+    if (!username || !password) {
+      return res.status(400).json({ errorMessage: "input all fields" });
+    }
+
+    const existingUser = await User.findOne({ username });
+    if (!existingUser)
+      return res
+        .status(401)
+        .json({ errorMessage: "Incorrect Email or Password" });
+
+    const passwordCorrect = await bcrypt.compare(
+      password,
+      existingUser.password
+    );
+
+    if (!passwordCorrect)
+      return res
+        .status(401)
+        .json({ errorMessage: "Incorrect Email or Password" });
+
+    //sign token
+    const { accessToken, refreshToken } = generateTokens(existingUser);
+    res.cookie("refreshToken", refreshToken, {
+      httpOnly: true,
+      secure: true, // ✅ required for SameSite=None
+      sameSite: "Strict",
+
+      maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
+    });
+
+    res.status(200).json({
+      id: existingUser.id,
+      username: existingUser.username,
+      message: "Successfully log in",
+      accessToken,
+    });
+  } catch (err) {
+    console.log(err);
+    res.status(500).send();
+  }
 };
