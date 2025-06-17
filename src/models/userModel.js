@@ -7,9 +7,26 @@ const userSchema = new mongoose.Schema(
       type: String,
       required: true,
     },
-    password: {
+    email: {
       type: String,
       required: true,
+      default: "",
+    },
+    password: {
+      type: String,
+      required: function () {
+        return !this.isGoogleLoggedIn; // Only require password if not logging in via Google
+      },
+      default: "",
+    },
+    isGoogleLoggedIn: {
+      type: Boolean,
+      default: false,
+    },
+
+    emailVerified: {
+      type: Boolean,
+      default: false,
     },
   },
   {
@@ -18,9 +35,10 @@ const userSchema = new mongoose.Schema(
 );
 
 userSchema.pre("save", async function (next) {
-  const salt = await bcrypt.genSalt();
-  this.password = await bcrypt.hash(this.password, salt);
-
+  if (!this.isGoogleLoggedIn) {
+    const salt = await bcrypt.genSalt();
+    this.password = await bcrypt.hash(this.password, salt);
+  }
   next();
 });
 
