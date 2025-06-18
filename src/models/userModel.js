@@ -9,7 +9,9 @@ const userSchema = new mongoose.Schema(
     },
     email: {
       type: String,
-      required: true,
+      required: function () {
+        return this.isGoogleLoggedIn; // Only require email if not logging in via Google
+      },
       default: "",
     },
     password: {

@@ -30,11 +30,20 @@ export const createUser = async (req, res) => {
     // Save the user to the database
     const user = await newUser.save();
     const { accessToken, refreshToken } = generateTokens(user);
-    res.cookie("sessionID", token);
-    // Send response
-    res
-      .status(201)
-      .json({ message: "User created successfully", blog: newUser });
+    res.cookie("refreshToken", refreshToken, {
+      httpOnly: true,
+      secure: true, // ✅ required for SameSite=None
+      sameSite: "Strict",
+
+      maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
+    });
+
+    res.status(200).json({
+      id: user.id,
+      username: user.username,
+      message: "Successfully log in",
+      accessToken,
+    });
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
