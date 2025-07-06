@@ -59,10 +59,8 @@ export const loginUser = async (req, res) => {
 
     const existingUser = await User.findOne({ username });
     if (!existingUser)
-      return res
-        .status(401)
-        .json({ errorMessage: "Incorrect Email or Password" });
-
+      return res.status(401).json({ message: "Incorrect Email or Password" });
+    console.log(existingUser);
     const passwordCorrect = await bcrypt.compare(
       password,
       existingUser.password

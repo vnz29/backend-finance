@@ -3,7 +3,7 @@ import User from "../models/userModel.js";
 export const authenticateToken = (req, res, next) => {
   const authHeader = req.headers["authorization"];
   const token = authHeader && authHeader.split(" ")[1];
-
+  console.log(token);
   if (!token) return res.sendStatus(401);
 
   jwt.verify(token, process.env.ACCESS_TOKEN_SECRET, (err, user) => {
@@ -27,6 +27,7 @@ export const requireAuth = (req, res, next) => {
       }
     });
   } else {
+    console.log("pasok dito");
     res.status(401).send({ errorMessage: "unauthorized" });
   }
 };
