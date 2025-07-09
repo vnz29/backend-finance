@@ -18,7 +18,7 @@ export const getCurrentPurchase = async (req, res) => {
         $gte: startOfDay, // Greater than or equal to the start of today
         $lt: endOfDay, // Less than the end of today
       },
-    });
+    }).sort({ createdAt: -1 });
     console.log(item);
     res.status(201).json({ message: "Items are succefully fetched", item });
   } catch (error) {
