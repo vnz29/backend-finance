@@ -2,7 +2,7 @@ import Purchase from "../models/purchaseModel.js";
 
 export const getCurrentPurchase = async (req, res) => {
   const userID = req.query.userID;
-
+  console.log("napasok");
   const startOfDay = new Date();
   startOfDay.setHours(0, 0, 0, 0); // Set to 00:00:00.000 (start of today)
 
@@ -19,8 +19,10 @@ export const getCurrentPurchase = async (req, res) => {
         $lt: endOfDay, // Less than the end of today
       },
     });
+    console.log(item);
     res.status(201).json({ message: "Items are succefully fetched", item });
   } catch (error) {
+    console.log("error");
     res.status(500).send("Error fetching the items");
   }
 };

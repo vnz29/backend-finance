@@ -5,12 +5,12 @@ import { OAuth2Client } from "google-auth-library";
 const client = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
 const generateTokens = (user) => {
   const accessToken = jwt.sign(
-    { id: user.id },
+    { id: user.id, username: user.username },
     process.env.ACCESS_TOKEN_SECRET,
     { expiresIn: "15m" }
   );
   const refreshToken = jwt.sign(
-    { id: user.id },
+    { id: user.id, username: user.username },
     process.env.REFRESH_TOKEN_SECRET,
     { expiresIn: "7d" }
   );
@@ -60,7 +60,7 @@ export const loginUser = async (req, res) => {
     const existingUser = await User.findOne({ username });
     if (!existingUser)
       return res.status(401).json({ message: "Incorrect Email or Password" });
-    console.log(existingUser);
+
     const passwordCorrect = await bcrypt.compare(
       password,
       existingUser.password
@@ -86,6 +86,7 @@ export const loginUser = async (req, res) => {
       username: existingUser.username,
       message: "Successfully log in",
       accessToken,
+      refreshToken,
     });
   } catch (err) {
     console.log(err);
@@ -95,20 +96,20 @@ export const loginUser = async (req, res) => {
 
 // REFRESH TOKEN
 export const refreshToken = async (req, res) => {
-  const token = req.cookies.refreshToken;
+  const token = req.body.refreshToken || req.cookies.refreshToken;
 
   // console.log(token);
   if (!token) return res.sendStatus(401);
 
   jwt.verify(token, process.env.REFRESH_TOKEN_SECRET, (err, user) => {
     if (err) return res.sendStatus(403);
-
+    console.log(user, "line");
     const accessToken = jwt.sign(
       { id: user.id },
       process.env.ACCESS_TOKEN_SECRET,
       { expiresIn: "15m" }
     );
-    res.json({ accessToken });
+    res.json({ accessToken, userId: user.id, username: user.username });
   });
 };
 
