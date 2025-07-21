@@ -1,3 +1,4 @@
+import mongoose from "mongoose";
 import Purchase from "../models/purchaseModel.js";
 
 export const getCurrentPurchase = async (req, res) => {
@@ -26,44 +27,90 @@ export const getCurrentPurchase = async (req, res) => {
     res.status(500).send("Error fetching the items");
   }
 };
-export const getSpecificPurchase = async (req, res) => {
-  const { userID } = req.body;
-  const { start_date, end_date } = req.query;
-  const startDate = new Date(start_date);
-  const endDate = new Date(end_date);
-  startDate.setHours(0, 0, 0, 0); // Set to 00:00:00.000 (start of today)
-  endDate.setHours(23, 59, 59, 999); // Se
 
-  // Initialize the filter object
-  let filter = {};
+export const getSpecificPurchase = async (req, res) => {
+  const { start_date, end_date, userID } = req.query;
+
+  if (!userID) {
+    return res.status(400).json({ error: "userID is required" });
+  }
+
+  // Cast userID to ObjectId
+  let match = {
+    userId: new mongoose.Types.ObjectId(userID),
+    isDeleted: false,
+  };
 
   if (start_date || end_date) {
-    filter.createdAt = {};
-  }
+    match.createdAt = {};
 
-  if (start_date) {
-    filter.createdAt.$gte = new Date(start_date); // Greater than or equal to start_date
-  }
+    if (start_date) {
+      const [year, month, day] = start_date.split("-").map(Number);
+      const startDate = new Date(Date.UTC(year, month - 1, day, 0, 0, 0));
 
-  if (end_date) {
-    filter.createdAt.$lte = new Date(end_date); // Less than or equal to end_date
-  }
+      if (isNaN(startDate))
+        return res.status(400).json({ error: "Invalid start_date" });
 
+      match.createdAt.$gte = startDate;
+    }
+
+    if (end_date) {
+      const [year, month, day] = end_date.split("-").map(Number);
+      const endDate = new Date(Date.UTC(year, month - 1, day, 23, 59, 59, 999));
+
+      if (isNaN(endDate))
+        return res.status(400).json({ error: "Invalid end_date" });
+
+      match.createdAt.$lte = endDate;
+    }
+  }
   try {
-    const events = await Purchase.find({
-      userId: userID,
-      isDeleted: false,
-      createdAt: {
-        // Using createdAt field from timestamps
-        $gte: startDate, // Greater than or equal to the start of today
-        $lt: endDate, // Less than the end of today
-      },
-    }); // Query the events using the filter
-    res.json(events); // Return the filtered events
+    console.log(match);
+    const events = await Purchase.aggregate([
+      [
+        { $match: match },
+        {
+          $group: {
+            _id: {
+              $dateToString: {
+                format: "%Y-%m-%d",
+                date: "$createdAt",
+                timezone: "UTC",
+              },
+            },
+            purchases: { $push: "$$ROOT" },
+            count: { $sum: 1 },
+            totalAmount: { $sum: "$amount" },
+          },
+        },
+        { $sort: { _id: -1 } },
+
+        // Add this block ⬇️ to compute grand totals and structure response
+        {
+          $group: {
+            _id: null,
+            days: { $push: "$$ROOT" },
+            totalAmount: { $sum: "$totalAmount" },
+            totalCount: { $sum: "$count" },
+          },
+        },
+        {
+          $project: {
+            _id: 0,
+            totalAmount: 1,
+            totalCount: 1,
+            days: 1,
+          },
+        },
+      ],
+    ]);
+    console.log(events);
+    res.json(events);
   } catch (err) {
-    res
-      .status(500)
-      .json({ error: "An error occurred while fetching the items" });
+    console.error("Aggregation error:", err);
+    res.status(500).json({
+      error: "An error occurred while grouping the purchases",
+    });
   }
 };
 
