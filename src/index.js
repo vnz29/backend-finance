@@ -16,6 +16,17 @@ app.use(
 );
 app.use(cookieParser());
 app.use(express.json());
+app.use((req, res, next) => {
+  const userAgent = req.headers["x-platform"] || "unknown";
+  console.log(userAgent, "useragent");
+  if (/mobile/i.test(userAgent)) {
+    req.isMobile = true;
+  } else {
+    req.isMobile = false;
+  }
+
+  next();
+});
 // Connect to MongoDB
 connectDB();
 const PORT = process.env.PORT || 3000;

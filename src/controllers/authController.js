@@ -7,7 +7,7 @@ const generateTokens = (user) => {
   const accessToken = jwt.sign(
     { id: user.id, username: user.username },
     process.env.ACCESS_TOKEN_SECRET,
-    { expiresIn: "15m" }
+    { expiresIn: "5m" }
   );
   const refreshToken = jwt.sign(
     { id: user.id, username: user.username },
@@ -29,21 +29,22 @@ export const createUser = async (req, res) => {
 
     // Save the user to the database
     const user = await newUser.save();
-    const { accessToken, refreshToken } = generateTokens(user);
-    res.cookie("refreshToken", refreshToken, {
-      httpOnly: true,
-      secure: true, // ✅ required for SameSite=None
-      sameSite: "Strict",
+    // const { accessToken, refreshToken } = generateTokens(user);
+    // res.cookie("refreshToken", refreshToken, {
+    // httpOnly: true,
+    //   secure: true,
+    //   sameSite: "Strict",
 
-      maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
-    });
+    //   maxAge: 7 * 24 * 60 * 60 * 1000,
+    // });
+    res.status(200).json({ message: "Successfully Created the user" });
 
-    res.status(200).json({
-      id: user.id,
-      username: user.username,
-      message: "Successfully log in",
-      accessToken,
-    });
+    // res.status(200).json({
+    //   id: user.id,
+    //   username: user.username,
+    //   message: "Successfully log in",
+    //   accessToken,
+    // });
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
@@ -58,8 +59,10 @@ export const loginUser = async (req, res) => {
     }
 
     const existingUser = await User.findOne({ username });
-    if (!existingUser)
-      return res.status(401).json({ message: "Incorrect Email or Password" });
+
+    if (!existingUser) {
+      return res.status(400).json({ message: "Incorrect Email or Password" });
+    }
 
     const passwordCorrect = await bcrypt.compare(
       password,
@@ -67,9 +70,7 @@ export const loginUser = async (req, res) => {
     );
 
     if (!passwordCorrect)
-      return res
-        .status(401)
-        .json({ errorMessage: "Incorrect Email or Password" });
+      return res.status(400).json({ message: "Incorrect Email or Password" });
 
     //sign token
     const { accessToken, refreshToken } = generateTokens(existingUser);
@@ -104,18 +105,40 @@ export const refreshToken = async (req, res) => {
   jwt.verify(token, process.env.REFRESH_TOKEN_SECRET, (err, user) => {
     if (err) return res.sendStatus(403);
     console.log(user, "line");
-    const accessToken = jwt.sign(
-      { id: user.id },
-      process.env.ACCESS_TOKEN_SECRET,
-      { expiresIn: "15m" }
-    );
-    res.json({ accessToken, userId: user.id, username: user.username });
+    const { accessToken, refreshToken } = generateTokens(user);
+    res.json({
+      accessToken,
+      refreshToken,
+      userId: user.id,
+      username: user.username,
+    });
   });
 };
 
 // LOGOUT
-export const logoutUser = async (req, res) => {
-  res.clearCookie("refreshToken");
+// export const logoutUser = async (req, res) => {
+//   res.clearCookie("refreshToken");
+//   res.sendStatus(204);
+// };
+export const logoutUser = (req, res) => {
+  const { refreshToken } = req.body;
+  console.log("Before clearing:", req.cookies.refreshToken);
+  console.log("Response headerss", res.getHeaders());
+  if (!refreshToken) {
+    return res.status(400).json({ message: "Refresh token required" });
+  }
+
+  // Optionally: invalidate the token here if you track tokens in DB
+
+  // Clear cookie if you use cookies for refresh tokens
+  res.clearCookie("refreshToken", {
+    httpOnly: true,
+    secure: true,
+    sameSite: "Strict",
+  });
+
+  // Respond with 204 No Content
+  console.log("Response headers:", res.getHeaders());
   res.sendStatus(204);
 };
 
