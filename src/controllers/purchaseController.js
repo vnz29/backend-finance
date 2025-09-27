@@ -3,13 +3,28 @@ import Purchase from "../models/purchaseModel.js";
 
 export const getCurrentPurchase = async (req, res) => {
   const userID = req.query.userID;
-  console.log("napasok");
-  const startOfDay = new Date();
-  startOfDay.setHours(0, 0, 0, 0); // Set to 00:00:00.000 (start of today)
+  // console.log("napasok");
+  // const today = new Date();
+  // const startOfDay = new Date(today);
+  // startOfDay.setHours(0, 0, 0, 0); // Set to 00:00:00.000 (start of today)
 
-  // Get the end of today (just before midnight of the next day)
-  const endOfDay = new Date();
-  endOfDay.setHours(23, 59, 59, 999); // Se
+  // // Get the end of today (just before midnight of the next day)
+  // const endOfDay = new Date(today);
+  // endOfDay.setHours(23, 59, 59, 999); // Se
+  const todayUTC = new Date(); // current UTC date/time
+
+  // Get UTC year/month/day
+  const year = todayUTC.getUTCFullYear();
+  const month = todayUTC.getUTCMonth();
+  const day = todayUTC.getUTCDate();
+
+  // Start of day in UTC
+  const startOfDay = new Date(Date.UTC(year, month, day, 0, 0, 0, 0));
+
+  // End of day in UTC
+  const endOfDay = new Date(Date.UTC(year, month, day, 23, 59, 59, 999));
+
+  console.log(startOfDay, endOfDay);
   try {
     const item = await Purchase.find({
       userId: userID,
