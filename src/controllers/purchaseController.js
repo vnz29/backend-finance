@@ -56,7 +56,7 @@ export const getSpecificPurchase = async (req, res) => {
     isDeleted: false,
   };
 
-  if (start_date || end_date) {
+  if (req.isMobile) {
     match.createdAt = {};
 
     if (start_date) {
@@ -78,48 +78,63 @@ export const getSpecificPurchase = async (req, res) => {
 
       match.createdAt.$lte = endDate;
     }
+  } else {
+    match.createdAt = {};
+
+    if (start_date) {
+      const [y, m, d] = start_date.split("-").map(Number);
+      match.createdAt.$gte = new Date(Date.UTC(y, m - 1, d, 0, 0, 0));
+    }
+
+    if (end_date) {
+      const [y, m, d] = end_date.split("-").map(Number);
+      match.createdAt.$lte = new Date(Date.UTC(y, m - 1, d, 23, 59, 59, 999));
+    }
   }
+
   try {
     console.log(match);
-    const events = await Purchase.aggregate([
-      [
-        { $match: match },
-        {
-          $group: {
-            _id: {
-              $dateToString: {
-                format: "%Y-%m-%d",
-                date: "$createdAt",
-                timezone: "UTC",
+    const events = req.isMobile
+      ? await Purchase.aggregate([
+          [
+            { $match: match },
+            {
+              $group: {
+                _id: {
+                  $dateToString: {
+                    format: "%Y-%m-%d",
+                    date: "$createdAt",
+                    timezone: "UTC",
+                  },
+                },
+                purchases: { $push: "$$ROOT" },
+                count: { $sum: 1 },
+                totalAmount: { $sum: "$amount" },
               },
             },
-            purchases: { $push: "$$ROOT" },
-            count: { $sum: 1 },
-            totalAmount: { $sum: "$amount" },
-          },
-        },
-        { $sort: { _id: -1 } },
+            { $sort: { _id: -1 } },
 
-        // Add this block ⬇️ to compute grand totals and structure response
-        {
-          $group: {
-            _id: null,
-            days: { $push: "$$ROOT" },
-            totalAmount: { $sum: "$totalAmount" },
-            totalCount: { $sum: "$count" },
-          },
-        },
-        {
-          $project: {
-            _id: 0,
-            totalAmount: 1,
-            totalCount: 1,
-            days: 1,
-          },
-        },
-      ],
-    ]);
-    console.log(events);
+            // Add this block ⬇️ to compute grand totals and structure response
+            {
+              $group: {
+                _id: null,
+                days: { $push: "$$ROOT" },
+                totalAmount: { $sum: "$totalAmount" },
+                totalCount: { $sum: "$count" },
+              },
+            },
+            {
+              $project: {
+                _id: 0,
+                totalAmount: 1,
+                totalCount: 1,
+                days: 1,
+              },
+            },
+          ],
+        ])
+      : await Purchase.find(match).sort({ createdAt: -1 });
+
     res.json(events);
   } catch (err) {
     console.error("Aggregation error:", err);

@@ -8,9 +8,7 @@ const app = express();
 // Allow frontend origin
 app.use(
   cors({
-    origin:
-      // "https://purchase-frontend-xwus-nqe7f4vpk-vnz29s-projects.vercel.app",
-      "http://localhost:5173",
+    origin: "https://purchase-frontend-spendly.vercel.app",
     credentials: true, // if you're using cookies or authorization headers
   })
 );
@@ -18,7 +16,7 @@ app.use(cookieParser());
 app.use(express.json());
 app.use((req, res, next) => {
   const userAgent = req.headers["x-platform"] || "unknown";
-  console.log(userAgent, "useragent");
+
   if (/mobile/i.test(userAgent)) {
     req.isMobile = true;
   } else {
