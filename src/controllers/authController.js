@@ -82,7 +82,7 @@ export const loginUser = async (req, res) => {
     res.cookie("refreshToken", refreshToken, {
       httpOnly: true,
       secure: true, // ✅ required for SameSite=None
-      sameSite: "Strict",
+      sameSite: "None",
 
       maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
     });
@@ -138,7 +138,7 @@ export const logoutUser = (req, res) => {
   res.clearCookie("refreshToken", {
     httpOnly: true,
     secure: true,
-    sameSite: "Strict",
+    sameSite: "None",
   });
 
   // Respond with 204 No Content
@@ -167,7 +167,7 @@ export const loginGoogle = async (req, res) => {
       res.cookie("refreshToken", refreshToken, {
         httpOnly: true,
         secure: true, // ✅ required for SameSite=None
-        sameSite: "Strict",
+        sameSite: "None",
 
         maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
       });
@@ -189,7 +189,7 @@ export const loginGoogle = async (req, res) => {
       res.cookie("refreshToken", refreshToken, {
         httpOnly: true,
         secure: true, // ✅ required for SameSite=None
-        sameSite: "Strict",
+        sameSite: "None",
 
         maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
       });
