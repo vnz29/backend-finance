@@ -105,7 +105,7 @@ export const loginUser = async (req, res) => {
 // REFRESH TOKEN
 export const refreshToken = async (req, res) => {
   const token = req.body.refreshToken || req.cookies.refreshToken;
-
+  console.log(refreshToken);
   // console.log(token);
   if (!token) return res.sendStatus(401);
 
