@@ -87,13 +87,22 @@ export const loginUser = async (req, res) => {
       maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
     });
 
-    res.status(200).json({
-      id: existingUser.id,
-      username: existingUser.username,
-      message: "Successfully log in",
-      accessToken,
-      refreshToken,
-    });
+    if (req.isMobile) {
+      res.status(200).json({
+        id: existingUser.id,
+        username: existingUser.username,
+        message: "Successfully log in",
+        accessToken,
+        refreshToken,
+      });
+    } else {
+      res.status(200).json({
+        id: existingUser.id,
+        username: existingUser.username,
+        message: "Successfully log in",
+        accessToken,
+      });
+    }
   } catch (err) {
     console.log(err);
     res.status(500).send();
@@ -111,12 +120,21 @@ export const refreshToken = async (req, res) => {
     if (err) return res.sendStatus(403);
 
     const { accessToken, refreshToken } = generateTokens(user);
-    res.json({
-      accessToken,
-      refreshToken,
-      userId: user.id,
-      username: user.username,
-    });
+    if (req.isMobile) {
+      res.json({
+        accessToken,
+        refreshToken,
+        userId: user.id,
+        username: user.username,
+      });
+    } else {
+      res.json({
+        accessToken,
+
+        userId: user.id,
+        username: user.username,
+      });
+    }
   });
 };
 
