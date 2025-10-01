@@ -8,9 +8,8 @@ const app = express();
 // Allow frontend origin
 app.use(
   cors({
-    origin:
-      // " origin: "https://purchase-frontend-spendly.vercel.app",
-      "http://localhost:5173",
+    origin: "https://purchase-frontend-spendly.vercel.app",
+    //  origin:"http://localhost:5173",
     credentials: true, // if you're using cookies or authorization headers
   })
 );

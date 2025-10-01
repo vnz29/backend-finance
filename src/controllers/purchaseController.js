@@ -24,7 +24,6 @@ export const getCurrentPurchase = async (req, res) => {
   // End of day in UTC
   const endOfDay = new Date(Date.UTC(year, month, day, 23, 59, 59, 999));
 
-  console.log(startOfDay, endOfDay);
   try {
     const item = await Purchase.find({
       userId: userID,
@@ -35,7 +34,7 @@ export const getCurrentPurchase = async (req, res) => {
         $lt: endOfDay, // Less than the end of today
       },
     }).sort({ createdAt: -1 });
-    console.log(item);
+
     res.status(201).json({ message: "Items are succefully fetched", item });
   } catch (error) {
     console.log("error");
@@ -93,7 +92,6 @@ export const getSpecificPurchase = async (req, res) => {
   }
 
   try {
-    console.log(match);
     const events = req.isMobile
       ? await Purchase.aggregate([
           [
@@ -187,7 +185,6 @@ export const updatePurchase = async (req, res) => {
   }
 };
 export const deletePurchase = async (req, res) => {
-  console.log("test delete page");
   const PurchaseID = req.params.id;
   const updatedPurchase = req.body;
   try {

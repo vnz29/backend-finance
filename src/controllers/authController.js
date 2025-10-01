@@ -25,8 +25,6 @@ export const createUser = async (req, res) => {
     const existingUser = await User.findOne({ username });
 
     if (existingUser) {
-      console.log(existingUser);
-      console.log("napasok");
       return res.status(400).json({ message: "Username already exists." });
     }
     const newUser = new User({
@@ -105,13 +103,13 @@ export const loginUser = async (req, res) => {
 // REFRESH TOKEN
 export const refreshToken = async (req, res) => {
   const token = req.body.refreshToken || req.cookies.refreshToken;
-  console.log(refreshToken);
+  console.log(refreshToken, "refreshToken");
   // console.log(token);
   if (!token) return res.sendStatus(401);
 
   jwt.verify(token, process.env.REFRESH_TOKEN_SECRET, (err, user) => {
     if (err) return res.sendStatus(403);
-    console.log(user, "line");
+
     const { accessToken, refreshToken } = generateTokens(user);
     res.json({
       accessToken,
@@ -129,8 +127,7 @@ export const refreshToken = async (req, res) => {
 // };
 export const logoutUser = (req, res) => {
   const { refreshToken } = req.body;
-  console.log("Before clearing:", req.cookies.refreshToken);
-  console.log("Response headerss", res.getHeaders());
+
   if (!refreshToken) {
     return res.status(400).json({ message: "Refresh token required" });
   }
@@ -145,7 +142,7 @@ export const logoutUser = (req, res) => {
   });
 
   // Respond with 204 No Content
-  console.log("Response headers:", res.getHeaders());
+
   res.sendStatus(204);
 };
 
