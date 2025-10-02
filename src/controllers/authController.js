@@ -87,7 +87,7 @@ export const loginUser = async (req, res) => {
       path: "/",
       maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
     });
-
+    console.log("Issued refreshToken:", refreshToken);
     if (req.isMobile) {
       res.status(200).json({
         id: existingUser.id,
