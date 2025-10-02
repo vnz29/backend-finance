@@ -110,33 +110,60 @@ export const loginUser = async (req, res) => {
 };
 
 // REFRESH TOKEN
-export const refreshToken = async (req, res) => {
+export const refreshTokenController = async (req, res) => {
   const token = req.cookies.refreshToken;
-  console.log(token, "refreshToken");
-  // console.log(token);
   if (!token) return res.sendStatus(401);
 
-  jwt.verify(token, process.env.REFRESH_TOKEN_SECRET, (err, user) => {
+  jwt.verify(token, process.env.REFRESH_TOKEN_SECRET, (err, decodedUser) => {
     if (err) return res.sendStatus(403);
 
-    const { accessToken, refreshToken } = generateTokens(user);
+    const { accessToken, refreshToken: newRefreshToken } =
+      generateTokens(decodedUser);
+
     if (req.isMobile) {
       res.json({
         accessToken,
-        refreshToken,
-        userId: user.id,
-        username: user.username,
+        refreshToken: newRefreshToken, // ✅ fixed
+        userId: decodedUser.id,
+        username: decodedUser.username,
       });
     } else {
       res.json({
         accessToken,
-
-        userId: user.id,
-        username: user.username,
+        userId: decodedUser.id,
+        username: decodedUser.username,
       });
     }
   });
 };
+
+// export const refreshToken = async (req, res) => {
+//   const token = req.cookies.refreshToken;
+//   console.log(token, "refreshToken");
+//   // console.log(token);
+//   if (!token) return res.sendStatus(401);
+
+//   jwt.verify(token, process.env.REFRESH_TOKEN_SECRET, (err, user) => {
+//     if (err) return res.sendStatus(403);
+
+//     const { accessToken, refreshToken } = generateTokens(user);
+//     if (req.isMobile) {
+//       res.json({
+//         accessToken,
+//         refreshToken,
+//         userId: user.id,
+//         username: user.username,
+//       });
+//     } else {
+//       res.json({
+//         accessToken,
+
+//         userId: user.id,
+//         username: user.username,
+//       });
+//     }
+//   });
+// };
 
 // LOGOUT
 // export const logoutUser = async (req, res) => {
