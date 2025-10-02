@@ -83,7 +83,7 @@ export const loginUser = async (req, res) => {
       httpOnly: true,
       secure: true, // ✅ required for SameSite=None
       sameSite: "None",
-      domain: "purchase-frontend-spendly.vercel.app", // ✅ frontend domain
+      // ✅ frontend domain
       path: "/",
       maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
     });
@@ -216,7 +216,7 @@ export const loginGoogle = async (req, res) => {
         httpOnly: true,
         secure: true, // ✅ required for SameSite=None
         sameSite: "None",
-        domain: "purchase-frontend-spendly.vercel.app", // ✅ frontend domain
+        // ✅ frontend domain
         path: "/",
         maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
       });
@@ -239,7 +239,7 @@ export const loginGoogle = async (req, res) => {
         httpOnly: true,
         secure: true, // ✅ required for SameSite=None
         sameSite: "None",
-        domain: "purchase-frontend-spendly.vercel.app", // ✅ frontend domain
+        // ✅ frontend domain
         path: "/",
         maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
       });
